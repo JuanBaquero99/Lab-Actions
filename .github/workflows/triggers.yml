@@ -1,0 +1,53 @@
+name: Triggers
+run-name: ¡Estoy aprendiendo a usar diferentes Triggers! #Diferenciar el worflow
+on:
+  push: #Se ejecutará en cada push
+    branches: 
+      - main #Solo se ejecutará en la rama main
+  pull_request:
+    types: [opened, synchronize, reopened] #Se ejecutará en cada pull request abierto, sincronizado o reabierto
+    paths: #Se ejecutará si se modifican los archivos de la lista
+      - '**.py' #Todos los archivos con extensión .py
+  issues: #Se ejecutará en cada issue abierto
+    types: #Se ejecutará si el issue es de tipo
+      - labeled #Se le asigna una etiqueta (Es decir cuando alguien necesita ayuda y le pone este tipo de etiqueta
+  workflow_dispatch: #Se ejecutará cuando se ejecute manualmente
+    inputs: #Se le pueden pasar parámetros
+      lenguaje_favorito: #Parámetro 1
+        description: 'Lenguaje favorito' 
+        default: Python
+        required: true #Es obligatorio
+        type: choice
+        options:
+        - Python
+        - JavaScript
+        - Go
+      nombre:
+        description: 'Tu nombre'
+        required: true
+        default: Juan
+        type: string
+  schedule: #Se ejecutará en un horario específico
+    - cron:  '15 22 * * *' #Se ejecutará a las 22:15
+jobs: #Se pueden tener varios jobs
+  hola-mundo-manual: #Nombre del job
+    runs-on: ubuntu-latest #Sistema operativo
+    steps: #Pasos
+      - name: Checkout #Nombre del paso
+        uses: actions/checkout@v3 #Acción a ejecutar
+      - name: Definir nombre 
+        run: echo "USERNAME=${{ inputs.nombre }}" >> $GITHUB_ENV
+      - name: Definir lenguaje
+        run: echo "LANGUAGE=${{ inputs.lenguaje_favorito }}" >> $GITHUB_ENV
+      - name: Correr script
+        run: python hola_lenguaje.py
+  hola-mundo:
+    if: ${{ github.event_name != 'workflow_dispatch' }} #Se ejecutará si el evento no es manual
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Definir variable
+        run: echo "USERNAME=${{ github.actor }}" >> $GITHUB_ENV
+      - name: Correr script
+        run: python hola_mundo.py
